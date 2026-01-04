@@ -24,26 +24,39 @@ export default function Contact() {
       newErrors.email = "Enter a valid email address.";
     }
 
-    if (!subject) {
-      newErrors.subject = "Subject is required.";
-    }
-
-    if (!message) {
-      newErrors.message = "Message is required.";
-    }
+    if (!subject) newErrors.subject = "Subject is required.";
+    if (!message) newErrors.message = "Message is required.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    const form = e.target;
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // ✅ STOP page reload
 
-    if (!validate(form)) {
-      e.preventDefault(); // ⛔ stop Formspree submit
-      setStatus("");
-    } else {
-      setStatus("Sending message...");
+    const form = e.target;
+    if (!validate(form)) return;
+
+    setStatus("Sending message...");
+
+    try {
+      const response = await fetch("https://formspree.io/f/xkgegbqd", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+        },
+        body: new FormData(form),
+      });
+
+      if (response.ok) {
+        setStatus("✅ Message sent successfully!");
+        form.reset();
+        setErrors({});
+      } else {
+        setStatus("❌ Something went wrong. Try again.");
+      }
+    } catch (error) {
+      setStatus("❌ Network error. Please try later.");
     }
   };
 
@@ -52,29 +65,19 @@ export default function Contact() {
       id="contact"
       className="p-10 border border-slate-600 rounded-xl shadow-sm mb-8"
     >
-      <h2 className="text-3xl font-bold text-center mb-10">
-        Contact Us
-      </h2>
+      <h2 className="text-3xl font-bold text-center mb-10">Contact Us</h2>
 
       <div className="max-w-xl mx-auto">
-        <form
-          action="https://formspree.io/f/xkgegbqd"
-          method="POST"
-          noValidate
-          onSubmit={handleSubmit}
-        >
+        <form onSubmit={handleSubmit} noValidate>
           {/* NAME */}
           <div className="mb-5">
             <label className="block mb-2 font-semibold">Name</label>
             <input
               type="text"
               name="name"
-              placeholder="Your Name"
-              className="w-full p-3 border border-slate-500 rounded-lg focus:ring-emerald-400 focus:border-emerald-400 bg-slate-600"
+              className="w-full p-3 border border-slate-500 rounded-lg bg-slate-600"
             />
-            <span className="error-message text-sm text-red-500 mt-1 block">
-              {errors.name}
-            </span>
+            <span className="text-sm text-red-500">{errors.name}</span>
           </div>
 
           {/* EMAIL */}
@@ -83,12 +86,9 @@ export default function Contact() {
             <input
               type="email"
               name="email"
-              placeholder="Your Email"
-              className="w-full p-3 border border-slate-500 rounded-lg focus:ring-emerald-400 focus:border-emerald-400 bg-slate-600"
+              className="w-full p-3 border border-slate-500 rounded-lg bg-slate-600"
             />
-            <span className="error-message text-sm text-red-500 mt-1 block">
-              {errors.email}
-            </span>
+            <span className="text-sm text-red-500">{errors.email}</span>
           </div>
 
           {/* SUBJECT */}
@@ -97,12 +97,9 @@ export default function Contact() {
             <input
               type="text"
               name="subject"
-              placeholder="Subject"
-              className="w-full p-3 border border-slate-500 rounded-lg focus:ring-emerald-400 focus:border-emerald-400 bg-slate-600"
+              className="w-full p-3 border border-slate-500 rounded-lg bg-slate-600"
             />
-            <span className="error-message text-sm text-red-500 mt-1 block">
-              {errors.subject}
-            </span>
+            <span className="text-sm text-red-500">{errors.subject}</span>
           </div>
 
           {/* MESSAGE */}
@@ -110,30 +107,22 @@ export default function Contact() {
             <label className="block mb-2 font-semibold">Message</label>
             <textarea
               name="message"
-              placeholder="Your Message"
-              className="w-full p-3 border border-slate-500 rounded-lg h-36 resize-y focus:ring-emerald-400 focus:border-emerald-400 bg-slate-600"
+              className="w-full p-3 border border-slate-500 rounded-lg h-36 bg-slate-600"
             />
-            <span className="error-message text-sm text-red-500 mt-1 block">
-              {errors.message}
-            </span>
+            <span className="text-sm text-red-500">{errors.message}</span>
           </div>
 
-          {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            className="w-full p-3 text-lg font-bold text-slate-900 bg-emerald-400 rounded-lg hover:bg-emerald-500 transition duration-300"
+            className="w-full p-3 text-lg font-bold text-slate-900 bg-emerald-400 rounded-lg hover:bg-emerald-500 transition"
           >
             Submit
           </button>
 
-          {/* STATUS MESSAGE */}
           {status && (
-            <div
-              id="form-status"
-              className="mt-4 text-center font-semibold text-emerald-400"
-            >
+            <p className="mt-4 text-center font-semibold text-emerald-400">
               {status}
-            </div>
+            </p>
           )}
         </form>
       </div>
