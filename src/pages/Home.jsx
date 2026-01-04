@@ -21,7 +21,7 @@ export default function Home() {
             <Hero />
             <Team />
             <Services />
-            <Projects projects={projects} />;
+            <Projects projects={projects} />
             <Contact />
             <Footer />
           </div>
